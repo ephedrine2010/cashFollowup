@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Daily Followup</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="login-screen" class="login-screen">
+            <div class="login-card">
+                <h1 class="login-title">Cash Daily Followup</h1>
+                <div id="login-form" class="auth-form">
+                    <input type="text" id="store-id" placeholder="Store ID" />
+                    <input type="text" id="emp-id" placeholder="Emp ID" />
+                    <button id="login-btn">Login</button>
+                    <button id="signup-btn">Sign Up</button>
+                    <button id="test-connection-btn" class="test-btn hidden">Test Connection</button>
+                </div>
+            </div>
+            <div class="login-footer">
+                <p>By <a href="https://www.linkedin.com/in/mohamed-shanab-154370132/" target="_blank" rel="noopener noreferrer">M. Shanab</a></p>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="hidden">
+            <h1>Cash Daily Followup</h1>
+            <div id="auth-section">
+                <div id="user-info" class="hidden">
+                    <span id="user-email"></span>
+                    <button id="logout-btn">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="hidden">
+            <!-- Daily Sales Tracking Section -->
+            <section class="card sales-section">
+                <!-- Sales Entry Form -->
+                <div class="sales-form-container">
+                    <h2>Add Daily Sales Record</h2>
+                    <form id="sales-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sales-day-no">Day No.:</label>
+                                <input type="number" id="sales-day-no" min="1" required />
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sales-total">Total Sales:</label>
+                                <input type="number" id="sales-total" step="0.01" min="0" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-on-account">On Account:</label>
+                                <input type="number" id="sales-on-account" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-online">Online:</label>
+                                <input type="number" id="sales-online" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-stc">STC:</label>
+                                <input type="number" id="sales-stc" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-rajhi">Rajhi:</label>
+                                <input type="number" id="sales-rajhi" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-tamra">Tamra:</label>
+                                <input type="number" id="sales-tamra" step="0.01" min="0" value="0" />
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sales-mada">Mada:</label>
+                                <input type="number" id="sales-mada" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-visa">Visa:</label>
+                                <input type="number" id="sales-visa" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-master">Master:</label>
+                                <input type="number" id="sales-master" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-other">Other:</label>
+                                <input type="number" id="sales-other" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-total-plastic">Total Plastic:</label>
+                                <input type="number" id="sales-total-plastic" step="0.01" readonly value="0" />
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sales-variance">Variance:</label>
+                                <input type="number" id="sales-variance" step="0.01" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-total-cash">Total Cash:</label>
+                                <input type="number" id="sales-total-cash" step="0.01" readonly value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn-primary">Add Sales Record</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sales Table -->
+                <div class="sales-table-container">
+                    <h2>Sales Records</h2>
+                    
+                    <!-- Months Tab -->
+                    <div class="months-tab" id="months-tab">
+                        <!-- Month buttons will be generated dynamically -->
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="sales-table" class="sales-table">
+                            <thead>
+                                <tr>
+                                    <th class="day-no-column">Day No.</th>
+                                    <th>Total Sales</th>
+                                    <th>On Account</th>
+                                    <th>Online</th>
+                                    <th>STC</th>
+                                    <th>Rajhi</th>
+                                    <th>Tamra</th>
+                                    <th class="plastic-column">Mada</th>
+                                    <th class="plastic-column">Visa</th>
+                                    <th class="plastic-column">Master</th>
+                                    <th class="plastic-column">Other</th>
+                                    <th class="total-plastic-column">Total Plastic</th>
+                                    <th>Variance</th>
+                                    <th class="total-cash-column">Total Cash</th>
+                                    <th>Amanco</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-table-body">
+                                <tr class="empty-row">
+                                    <td colspan="16" class="empty-state">No sales records yet. Add your first record above!</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="summary-row">
+                                    <td colspan="13" class="summary-label">Total Cash (Unchecked Amanco):</td>
+                                    <td id="total-cash-summary" class="summary-value total-cash-column">0.00</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- App Scripts (using ES6 modules) -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/sales.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
