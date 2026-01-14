@@ -24,7 +24,14 @@ const monthsTabContainer = document.getElementById('months-tab');
 // State
 let allSalesRecords = [];
 let currentMonth = getCurrentMonth(); // Current selected month
+let selectedYear = new Date().getFullYear(); // Selected year for viewing
 let unsubscribeSnapshot = null; // To unsubscribe from previous snapshots
+let currentDialogField = null; // Track which field is being edited
+let multipleValues = {
+    mada: [],
+    visa: [],
+    master: []
+}; // Store multiple values for each field
 
 // ============================================
 // Sales Tracking Functions
@@ -38,6 +45,11 @@ function getCurrentMonth() {
     return `${year}${month}`;
 }
 
+// Get current year
+function getCurrentYear() {
+    return new Date().getFullYear().toString();
+}
+
 // Extract store code from user email (first 4 characters)
 function getStoreCode() {
     if (!currentUser || !currentUser.email) return null;
@@ -48,13 +60,18 @@ function getStoreCode() {
 function generateMonthButtons() {
     if (!monthsTabContainer) return;
     
-    const currentYear = new Date().getFullYear();
     const months = [];
     
-    // Generate 12 months for the current year
+    // Update year display
+    const yearDisplay = document.getElementById('current-year');
+    if (yearDisplay) {
+        yearDisplay.textContent = selectedYear;
+    }
+    
+    // Generate 12 months for the selected year
     for (let month = 1; month <= 12; month++) {
         const monthStr = String(month).padStart(2, '0');
-        months.push(`${currentYear}${monthStr}`);
+        months.push(`${selectedYear}${monthStr}`);
     }
     
     monthsTabContainer.innerHTML = months.map(month => {
@@ -82,6 +99,24 @@ function selectMonth(month) {
 
 // Make selectMonth available globally
 window.selectMonth = selectMonth;
+
+// Change year (delta: -1 for previous, +1 for next)
+function changeYear(delta) {
+    selectedYear += delta;
+    
+    // Update the current month to match the selected year
+    const monthPart = currentMonth.substring(4); // Get MM part
+    currentMonth = `${selectedYear}${monthPart}`;
+    
+    // Regenerate month buttons for the new year
+    generateMonthButtons();
+    
+    // Load sales records for the new year/month
+    loadSalesRecords();
+}
+
+// Make changeYear available globally
+window.changeYear = changeYear;
 
 // Initialize Day No. with previous day
 function initializeDayNo() {
@@ -140,6 +175,7 @@ registerAuthStateHandler((user) => {
         initializeDayNo(); // Set day number when user logs in
         generateMonthButtons(); // Generate month buttons
         loadSalesRecords();
+        initializeMultipleValuesButtons(); // Initialize dialog buttons
     } else {
         allSalesRecords = [];
         if (monthsTabContainer) {
@@ -179,15 +215,26 @@ salesForm.addEventListener('submit', async (e) => {
         variance: parseFloat(salesVarianceInput.value) || 0,
         totalPlastic: calculateTotalPlastic(),
         totalCash: calculateTotalCash(),
+        // Store multiple values for mada, visa, and master
+        madaValues: multipleValues.mada.length > 0 ? multipleValues.mada : null,
+        visaValues: multipleValues.visa.length > 0 ? multipleValues.visa : null,
+        masterValues: multipleValues.master.length > 0 ? multipleValues.master : null,
         createdAt: serverTimestamp()
     };
 
     showLoading();
     try {
-        // New Firebase structure: store-code > cash-sheet > month > documents
-        const monthCollectionPath = `${storeCode}/cash-sheet/${currentMonth}`;
+        // New Firebase structure: store-code > year > month > documents
+        // Use selectedYear for data operations
+        const monthCollectionPath = `${storeCode}/${selectedYear}/${currentMonth}`;
         await addDoc(collection(db, monthCollectionPath), salesRecord);
         salesForm.reset();
+        // Reset multiple values
+        multipleValues = {
+            mada: [],
+            visa: [],
+            master: []
+        };
         initializeDayNo(); // Reset day number after form reset
         updateCalculatedFields(); // Reset calculated fields
         alert('Sales record added successfully!');
@@ -214,8 +261,9 @@ function loadSalesRecords() {
         unsubscribeSnapshot();
     }
 
-    // New Firebase structure: store-code > cash-sheet > month > documents
-    const monthCollectionPath = `${storeCode}/cash-sheet/${currentMonth}`;
+    // New Firebase structure: store-code > year > month > documents
+    // Use selectedYear for data operations
+    const monthCollectionPath = `${storeCode}/${selectedYear}/${currentMonth}`;
     const q = query(collection(db, monthCollectionPath));
 
     unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
@@ -326,7 +374,7 @@ async function deleteSalesRecord(recordId) {
 
     showLoading();
     try {
-        const monthCollectionPath = `${storeCode}/cash-sheet/${currentMonth}`;
+        const monthCollectionPath = `${storeCode}/${selectedYear}/${currentMonth}`;
         await deleteDoc(doc(db, monthCollectionPath, recordId));
     } catch (error) {
         console.error('Error deleting sales record:', error);
@@ -346,7 +394,7 @@ async function toggleAmanco(recordId, isChecked) {
 
     showLoading();
     try {
-        const monthCollectionPath = `${storeCode}/cash-sheet/${currentMonth}`;
+        const monthCollectionPath = `${storeCode}/${selectedYear}/${currentMonth}`;
         await updateDoc(doc(db, monthCollectionPath, recordId), {
             amanco: isChecked
         });
@@ -358,8 +406,151 @@ async function toggleAmanco(recordId, isChecked) {
     }
 }
 
+// ============================================
+// Multiple Values Dialog Functions
+// ============================================
+
+// Open the values dialog for a specific field
+function openValuesDialog(fieldName) {
+    currentDialogField = fieldName;
+    const dialog = document.getElementById('values-dialog');
+    const dialogTitle = document.getElementById('dialog-title');
+    const valuesContainer = document.getElementById('values-container');
+    
+    // Set dialog title
+    dialogTitle.textContent = `Enter Multiple ${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} Values`;
+    
+    // Clear and populate with existing values or create 5 empty inputs
+    valuesContainer.innerHTML = '';
+    const values = multipleValues[fieldName];
+    
+    if (values && values.length > 0) {
+        values.forEach((value, index) => {
+            createValueInput(valuesContainer, value, index);
+        });
+    } else {
+        // Create 5 initial empty inputs
+        for (let i = 0; i < 5; i++) {
+            createValueInput(valuesContainer, 0, i);
+        }
+    }
+    
+    // Show dialog
+    dialog.classList.remove('hidden');
+    updateDialogTotal();
+}
+
+// Close the dialog
+function closeValuesDialog() {
+    const dialog = document.getElementById('values-dialog');
+    dialog.classList.add('hidden');
+    currentDialogField = null;
+}
+
+// Create a value input row
+function createValueInput(container, value = 0, index = 0) {
+    const row = document.createElement('div');
+    row.className = 'value-input-row';
+    row.dataset.index = index;
+    
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = '0.01';
+    input.min = '0';
+    input.value = value;
+    input.placeholder = `Value ${index + 1}`;
+    input.className = 'value-input';
+    input.addEventListener('input', updateDialogTotal);
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-value-btn';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = () => removeValueInput(row);
+    
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    container.appendChild(row);
+}
+
+// Add more value inputs
+function addMoreValueInput() {
+    const container = document.getElementById('values-container');
+    const currentCount = container.children.length;
+    
+    // Add 5 more inputs
+    for (let i = 0; i < 5; i++) {
+        createValueInput(container, 0, currentCount + i);
+    }
+}
+
+// Remove a value input
+function removeValueInput(row) {
+    row.remove();
+    updateDialogTotal();
+}
+
+// Update the dialog total
+function updateDialogTotal() {
+    const inputs = document.querySelectorAll('.value-input');
+    let total = 0;
+    
+    inputs.forEach(input => {
+        const value = parseFloat(input.value) || 0;
+        total += value;
+    });
+    
+    document.getElementById('dialog-total').textContent = total.toFixed(2);
+}
+
+// Save multiple values
+function saveMultipleValues() {
+    if (!currentDialogField) return;
+    
+    const inputs = document.querySelectorAll('.value-input');
+    const values = [];
+    let total = 0;
+    
+    inputs.forEach(input => {
+        const value = parseFloat(input.value) || 0;
+        if (value > 0) { // Only store non-zero values
+            values.push(value);
+            total += value;
+        }
+    });
+    
+    // Store the values
+    multipleValues[currentDialogField] = values;
+    
+    // Update the corresponding input field
+    const fieldInput = document.getElementById(`sales-${currentDialogField}`);
+    if (fieldInput) {
+        fieldInput.value = total.toFixed(2);
+        // Trigger the input event to update calculated fields
+        fieldInput.dispatchEvent(new Event('input'));
+    }
+    
+    closeValuesDialog();
+}
+
+// Initialize event listeners for '+' buttons
+function initializeMultipleValuesButtons() {
+    document.querySelectorAll('.add-values-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const fieldName = btn.dataset.field;
+            openValuesDialog(fieldName);
+        });
+    });
+}
+
 // Make functions available globally
 window.deleteSalesRecord = deleteSalesRecord;
 window.toggleAmanco = toggleAmanco;
+window.openValuesDialog = openValuesDialog;
+window.closeValuesDialog = closeValuesDialog;
+window.addMoreValueInput = addMoreValueInput;
+window.saveMultipleValues = saveMultipleValues;
+window.removeValueInput = removeValueInput;
+window.updateDialogTotal = updateDialogTotal;
 
 console.log('Sales module initialized');

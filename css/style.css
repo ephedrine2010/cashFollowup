@@ -593,6 +593,75 @@ header h1 {
     margin-top: 30px;
 }
 
+.sales-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.sales-header h2 {
+    margin: 0;
+}
+
+.year-navigation {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.year-nav-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.year-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.year-nav-btn:active {
+    transform: translateY(0);
+}
+
+.year-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.year-label {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.year-value {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
 /* Months Tab */
 .months-tab {
     display: flex;
@@ -822,4 +891,219 @@ header h1 {
     .sales-table td {
         padding: 6px 4px;
     }
+}
+
+/* Multiple Values Dialog */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.dialog-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 2px solid var(--border-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.dialog-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.dialog-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.dialog-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.dialog-body {
+    padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.values-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.value-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.value-input-row input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.value-input-row input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.value-input-row .remove-value-btn {
+    padding: 8px 12px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-width: 36px;
+}
+
+.value-input-row .remove-value-btn:hover {
+    background: #da190b;
+    transform: scale(1.1);
+}
+
+.btn-add-more {
+    width: 100%;
+    padding: 12px;
+    background: #e3f2fd;
+    color: #1976d2;
+    border: 2px dashed #1976d2;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-add-more:hover {
+    background: #bbdefb;
+    border-color: #1565c0;
+}
+
+.dialog-footer {
+    padding: 20px 25px;
+    border-top: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.dialog-summary {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.dialog-summary strong {
+    margin-right: 10px;
+}
+
+.dialog-summary span {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.dialog-footer button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary {
+    background: var(--text-secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: var(--text-primary);
+}
+
+/* Input with button container */
+.input-with-btn {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.input-with-btn input {
+    flex: 1;
+}
+
+.add-values-btn {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-values-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Readonly inputs for fields with multiple values */
+.input-with-btn input[readonly] {
+    background-color: #f0f7ff;
+    cursor: pointer;
 }
