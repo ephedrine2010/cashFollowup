@@ -5,34 +5,37 @@ import { collection, query, onSnapshot, deleteDoc, doc, updateDoc } from "https:
 import { currentUser, registerAuthStateHandler, showLoading, hideLoading, db } from './auth.js';
 import { formatNumber } from './utils.js';
 
-// DOM Elements
-let salesTableBody, monthsTabContainer;
+// DOM Elements (like old version - initialized at top level)
+const salesTableBody = document.getElementById('sales-table-body');
+const monthsTabContainer = document.getElementById('months-tab');
 
-// State
+// State (like old version - module-level variables)
 let allSalesRecords = [];
 let currentMonth = getCurrentMonth();
 let selectedYear = new Date().getFullYear();
 let unsubscribeSnapshot = null;
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    salesTableBody = document.getElementById('sales-table-body');
-    monthsTabContainer = document.getElementById('months-tab');
-    
-    // Initialize auth handler
-    registerAuthStateHandler((user) => {
-        if (user) {
-            generateMonthButtons();
-            loadSalesRecords();
-        } else {
-            allSalesRecords = [];
-            if (monthsTabContainer) {
-                monthsTabContainer.innerHTML = '';
-            }
+// Export getter functions to access selectedYear and currentMonth (like old version)
+// This allows other modules to get the current values
+export function getSelectedYear() {
+    return selectedYear;
+}
+
+export function getCurrentMonthValue() {
+    return currentMonth;
+}
+
+// Initialize sales when user logs in (like old version)
+registerAuthStateHandler((user) => {
+    if (user) {
+        generateMonthButtons(); // Generate month buttons
+        loadSalesRecords();
+    } else {
+        allSalesRecords = [];
+        if (monthsTabContainer) {
+            monthsTabContainer.innerHTML = '';
         }
-    });
-    
-    console.log('Sales Display module initialized');
+    }
 });
 
 // Get current month in YYYYMM format
@@ -49,18 +52,9 @@ function getStoreCode() {
     return currentUser.email.substring(0, 4);
 }
 
-// Generate month buttons
+// Generate month buttons for the current year (like old version)
 function generateMonthButtons() {
-    // Ensure months tab container exists
-    if (!monthsTabContainer) {
-        console.warn('Months tab container not found');
-        // Try to find it again
-        monthsTabContainer = document.getElementById('months-tab');
-        if (!monthsTabContainer) {
-            console.error('Months tab container still not found');
-            return;
-        }
-    }
+    if (!monthsTabContainer) return;
     
     const months = [];
     
@@ -82,25 +76,35 @@ function generateMonthButtons() {
     }).join('');
 }
 
-// Select month
+// Select a month and load its data (like old version)
 function selectMonth(month) {
     currentMonth = month;
     
-    // Update active state
+    // Update active state of buttons
     document.querySelectorAll('.month-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.month === month);
+        if (btn.dataset.month === month) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
     });
     
-    // Load records
+    // Load sales records for selected month
     loadSalesRecords();
 }
 
-// Change year
+// Change year (delta: -1 for previous, +1 for next) (like old version)
 function changeYear(delta) {
     selectedYear += delta;
-    const monthPart = currentMonth.substring(4);
+    
+    // Update the current month to match the selected year
+    const monthPart = currentMonth.substring(4); // Get MM part
     currentMonth = `${selectedYear}${monthPart}`;
+    
+    // Regenerate month buttons for the new year
     generateMonthButtons();
+    
+    // Load sales records for the new year/month
     loadSalesRecords();
 }
 

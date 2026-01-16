@@ -254,11 +254,12 @@ function initializeEventListeners() {
     });
 
     // Initialize sales when user logs in
+    // Note: Month buttons and sales records display are now handled by sales-display.js
     registerAuthStateHandler((user) => {
         if (user) {
             initializeDayNo(); // Set day number when user logs in
-            generateMonthButtons(); // Generate month buttons
-            loadSalesRecords();
+            // generateMonthButtons(); // Disabled - handled by sales-display.js
+            // loadSalesRecords(); // Disabled - handled by sales-display.js
             // Initialize dialog buttons after a longer delay to ensure DOM is ready
             setTimeout(() => {
                 console.log('Calling initializeMultipleValuesButtons from auth handler');
@@ -266,9 +267,7 @@ function initializeEventListeners() {
             }, 500);
         } else {
             allSalesRecords = [];
-            if (monthsTabContainer) {
-                monthsTabContainer.innerHTML = '';
-            }
+            // Month buttons clearing is handled by sales-display.js
         }
     });
 }
