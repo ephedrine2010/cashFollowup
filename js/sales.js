@@ -1,6 +1,7 @@
 // Import necessary functions
 import { collection, addDoc, query, where, orderBy, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { currentUser, registerAuthStateHandler, showLoading, hideLoading, db } from './auth.js';
+import { formatEmptyZero } from './utils.js';
 
 // DOM Elements
 const salesForm = document.getElementById('sales-form');
@@ -315,19 +316,19 @@ function displaySalesRecords() {
         return `
             <tr>
                 <td class="day-no-column">${record.dayNo}</td>
-                <td>${record.totalSales.toFixed(2)}</td>
-                <td>${record.onAccount.toFixed(2)}</td>
-                <td>${record.online.toFixed(2)}</td>
-                <td>${record.stc.toFixed(2)}</td>
-                <td>${record.rajhi.toFixed(2)}</td>
-                <td>${record.tamra.toFixed(2)}</td>
-                <td class="plastic-column">${record.mada.toFixed(2)}</td>
-                <td class="plastic-column">${record.visa.toFixed(2)}</td>
-                <td class="plastic-column">${record.master.toFixed(2)}</td>
-                <td class="plastic-column">${record.other.toFixed(2)}</td>
-                <td class="total-plastic-column">${totalPlastic.toFixed(2)}</td>
-                <td class="${varianceClass}">${variance.toFixed(2)}</td>
-                <td class="total-cash-column">${totalCash.toFixed(2)}</td>
+                <td>${formatEmptyZero(record.totalSales)}</td>
+                <td>${formatEmptyZero(record.onAccount)}</td>
+                <td>${formatEmptyZero(record.online)}</td>
+                <td>${formatEmptyZero(record.stc)}</td>
+                <td>${formatEmptyZero(record.rajhi)}</td>
+                <td>${formatEmptyZero(record.tamra)}</td>
+                <td class="plastic-column">${formatEmptyZero(record.mada)}</td>
+                <td class="plastic-column">${formatEmptyZero(record.visa)}</td>
+                <td class="plastic-column">${formatEmptyZero(record.master)}</td>
+                <td class="plastic-column">${formatEmptyZero(record.other)}</td>
+                <td class="total-plastic-column">${formatEmptyZero(totalPlastic)}</td>
+                <td class="${varianceClass}">${formatEmptyZero(variance)}</td>
+                <td class="total-cash-column">${formatEmptyZero(totalCash)}</td>
                 <td>
                     <input type="checkbox" 
                            class="amanco-checkbox" 
@@ -357,7 +358,7 @@ function updateTotalCashSummary() {
         .filter(record => !record.amanco)
         .reduce((sum, record) => sum + (record.totalCash || 0), 0);
     
-    totalCashSummaryElement.textContent = totalCash.toFixed(2);
+    totalCashSummaryElement.textContent = formatEmptyZero(totalCash) || "0.00";
 }
 
 // Delete sales record

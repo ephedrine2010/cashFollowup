@@ -1,0 +1,33 @@
+<div id="export-data-dialog" class="dialog-overlay hidden">
+    <div class="dialog-content export-data-content">
+        <div class="dialog-header">
+            <h3>Export Data to Excel</h3>
+            <button class="dialog-close" id="close-export-dialog-btn">&times;</button>
+        </div>
+        <div class="dialog-body">
+            <div class="export-info">
+                <p>Select the months you want to export to Excel</p>
+            </div>
+            
+            <div class="year-selection">
+                <label for="export-year-select">Year:</label>
+                <select id="export-year-select" class="export-year-dropdown">
+                    <!-- Years will be populated dynamically -->
+                </select>
+            </div>
+
+            <div class="months-selection" id="export-months-container">
+                <!-- Month checkboxes will be generated dynamically -->
+            </div>
+
+            <div class="export-actions">
+                <button type="button" class="btn-select-all" id="select-all-months-btn">Select All</button>
+                <button type="button" class="btn-deselect-all" id="deselect-all-months-btn">Clear All</button>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn-secondary" id="cancel-export-btn">Cancel</button>
+            <button type="button" class="btn-primary" id="export-to-excel-btn">Export to Excel</button>
+        </div>
+    </div>
+</div>

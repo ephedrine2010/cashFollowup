@@ -1,0 +1,162 @@
+/* Export Data Dialog Styles */
+
+.export-data-content {
+    max-width: 600px;
+    width: 90%;
+}
+
+.export-info {
+    background: #f0f8ff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2196F3;
+}
+
+.export-info p {
+    margin: 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.year-selection {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.year-selection label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+}
+
+.export-year-dropdown {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.export-year-dropdown:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.months-selection {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px 0;
+}
+
+.month-checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f9f9f9;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.month-checkbox-item:hover {
+    background: #f0f0f0;
+    border-color: #667eea;
+}
+
+.month-checkbox-item.selected {
+    background: #e8f0fe;
+    border-color: #667eea;
+}
+
+.month-checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.month-checkbox-item label {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    flex: 1;
+    user-select: none;
+}
+
+.export-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.btn-select-all,
+.btn-deselect-all {
+    padding: 10px 20px;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-select-all:hover {
+    background: #667eea;
+    color: white;
+}
+
+.btn-deselect-all {
+    border-color: #999;
+    color: #999;
+}
+
+.btn-deselect-all:hover {
+    background: #999;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .months-selection {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .export-data-content {
+        width: 95%;
+    }
+
+    .export-actions {
+        flex-direction: column;
+    }
+
+    .btn-select-all,
+    .btn-deselect-all {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .months-selection {
+        grid-template-columns: 1fr;
+    }
+}

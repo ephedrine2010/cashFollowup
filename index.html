@@ -6,6 +6,7 @@
     <title>Cash Daily Followup</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="dialoges/start-cash-count/start-cash-count.css">
+    <link rel="stylesheet" href="dialoges/export-data/export-data.css">
 </head>
 <body>
     <div class="container">
@@ -134,7 +135,10 @@
                 <!-- Sales Table -->
                 <div class="sales-table-container">
                     <div class="sales-header">
-                        <h2>Sales Records</h2>
+                        <div class="title-with-btn">
+                            <h2>Sales Records</h2>
+                            <button type="button" id="export-excel-btn" class="btn-action">Export Excel</button>
+                        </div>
                         <div class="year-navigation">
                             <button class="year-nav-btn" id="prev-year-btn" onclick="changeYear(-1)" title="Previous Year">&lt;</button>
                             <div class="year-display" id="year-display">
@@ -218,6 +222,9 @@
         </div>
     </div>
 
+    <!-- Export Data Dialog Container -->
+    <div id="export-data-container"></div>
+
     <!-- Start Cash Count Dialog Container -->
     <div id="start-cash-count-container">
         <div id="start-cash-count-dialog" class="dialog-overlay hidden">
@@ -282,6 +289,7 @@
     <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/sales.js"></script>
+    <script type="module" src="dialoges/export-data/export-data.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

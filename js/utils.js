@@ -106,4 +106,14 @@ export function sortByProperty(array, property, order = 'asc') {
     });
 }
 
+/**
+ * Format number for table cell, showing empty string if zero
+ * @param {number} value - Value to format
+ * @returns {string} Formatted value or empty string
+ */
+export function formatEmptyZero(value) {
+    if (!value || Math.abs(value) < 0.001) return '';
+    return value.toFixed(2);
+}
+
 console.log('Utils module initialized');
