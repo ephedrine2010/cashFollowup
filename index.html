@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cash Daily Followup</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="dialoges/start-cash-count/start-cash-count.css">
 </head>
 <body>
     <div class="container">
@@ -42,7 +43,10 @@
             <section class="card sales-section">
                 <!-- Sales Entry Form -->
                 <div class="sales-form-container">
-                    <h2>Add Daily Sales Record</h2>
+                    <div class="title-with-actions">
+                        <h2>Add Daily Sales Record</h2>
+                        <button type="button" id="start-cash-count-btn" class="btn-action">Start Cash Count</button>
+                    </div>
                     <form id="sales-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -210,6 +214,65 @@
                 </div>
                 <button type="button" class="btn-secondary" onclick="closeValuesDialog()">Cancel</button>
                 <button type="button" class="btn-primary" onclick="saveMultipleValues()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Cash Count Dialog Container -->
+    <div id="start-cash-count-container">
+        <div id="start-cash-count-dialog" class="dialog-overlay hidden">
+            <div class="dialog-content start-cash-count-content">
+                <div class="dialog-header">
+                    <h3>Start Cash Count</h3>
+                    <button class="dialog-close" id="close-start-cash-btn">&times;</button>
+                </div>
+                <div class="dialog-body">
+                    <div class="start-cash-grid">
+                        <!-- Left Side: Basic Counts -->
+                        <div class="count-main-section">
+                            <div class="form-group">
+                                <label for="scc-total-cash">Total Cash (from sales):</label>
+                                <input type="number" id="scc-total-cash" step="0.01" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label for="scc-start-cash">Start Cash:</label>
+                                <input type="number" id="scc-start-cash" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="scc-total-expected">Total Cash + Start Cash:</label>
+                                <input type="number" id="scc-total-expected" step="0.01" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label for="scc-cashier-count">Cashier Count:</label>
+                                <input type="number" id="scc-cashier-count" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="scc-safe-count">Safe Count:</label>
+                                <input type="number" id="scc-safe-count" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group deficit-group">
+                                <label for="scc-deficit">Deficit:</label>
+                                <input type="number" id="scc-deficit" step="0.01" readonly />
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Delivery Orders -->
+                        <div class="count-delivery-section">
+                            <h4>Delivery Orders</h4>
+                            <div id="scc-delivery-container" class="delivery-container">
+                                <!-- Dynamic delivery order inputs -->
+                            </div>
+                            <button type="button" class="btn-add-more" id="scc-add-delivery-btn">+ Add More</button>
+                            <div class="form-group group-summary-group">
+                                <label for="scc-group-summary">Group Summary:</label>
+                                <input type="number" id="scc-group-summary" step="0.01" readonly value="0.00" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <button type="button" class="btn-secondary" id="cancel-start-cash-btn">Close</button>
+                </div>
             </div>
         </div>
     </div>

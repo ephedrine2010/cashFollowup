@@ -24,7 +24,9 @@ const clearFilterBtn = document.getElementById('clear-filter-btn');
 let allTransactions = [];
 
 // Set today's date as default
-dateInput.valueAsDate = new Date();
+if (dateInput) {
+    dateInput.valueAsDate = new Date();
+}
 
 // ============================================
 // Transaction Functions
@@ -40,37 +42,39 @@ registerAuthStateHandler((user) => {
 });
 
 // Add transaction
-transactionForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+if (transactionForm) {
+    transactionForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    if (!currentUser) {
-        alert('Please login first');
-        return;
-    }
+        if (!currentUser) {
+            alert('Please login first');
+            return;
+        }
 
-    const transaction = {
-        userId: currentUser.uid,
-        date: dateInput.value,
-        type: typeInput.value,
-        category: categoryInput.value.trim(),
-        amount: parseFloat(amountInput.value),
-        description: descriptionInput.value.trim(),
-        createdAt: serverTimestamp()
-    };
+        const transaction = {
+            userId: currentUser.uid,
+            date: dateInput ? dateInput.value : '',
+            type: typeInput ? typeInput.value : 'expense',
+            category: categoryInput ? categoryInput.value.trim() : '',
+            amount: amountInput ? parseFloat(amountInput.value) : 0,
+            description: descriptionInput ? descriptionInput.value.trim() : '',
+            createdAt: serverTimestamp()
+        };
 
-    showLoading();
-    try {
-        await addDoc(collection(db, 'transactions'), transaction);
-        transactionForm.reset();
-        dateInput.valueAsDate = new Date();
-        alert('Transaction added successfully!');
-    } catch (error) {
-        console.error('Error adding transaction:', error);
-        alert(`Failed to add transaction: ${error.message}`);
-    } finally {
-        hideLoading();
-    }
-});
+        showLoading();
+        try {
+            await addDoc(collection(db, 'transactions'), transaction);
+            transactionForm.reset();
+            if (dateInput) dateInput.valueAsDate = new Date();
+            alert('Transaction added successfully!');
+        } catch (error) {
+            console.error('Error adding transaction:', error);
+            alert(`Failed to add transaction: ${error.message}`);
+        } finally {
+            hideLoading();
+        }
+    });
+}
 
 // Load transactions
 function loadTransactions() {
@@ -95,7 +99,13 @@ function loadTransactions() {
         updateSummary();
     }, (error) => {
         console.error('Error loading transactions:', error);
-        alert(`Failed to load transactions: ${error.message}`);
+        // Alert with the full error message and link
+        const errorMsg = `Failed to load transactions: ${error.message}`;
+        alert(errorMsg);
+        
+        // Log specifically for the user to copy
+        console.log("%cFIREBASE INDEX ERROR LINK:", "color: red; font-size: 16px; font-weight: bold;");
+        console.log(error.message);
     });
 }
 
@@ -182,14 +192,16 @@ function updateSummary() {
 }
 
 // Filter functions
-filterDateInput.addEventListener('change', displayTransactions);
-filterTypeSelect.addEventListener('change', displayTransactions);
+if (filterDateInput) filterDateInput.addEventListener('change', displayTransactions);
+if (filterTypeSelect) filterTypeSelect.addEventListener('change', displayTransactions);
 
-clearFilterBtn.addEventListener('click', () => {
-    filterDateInput.value = '';
-    filterTypeSelect.value = '';
-    displayTransactions();
-});
+if (clearFilterBtn) {
+    clearFilterBtn.addEventListener('click', () => {
+        if (filterDateInput) filterDateInput.value = '';
+        if (filterTypeSelect) filterTypeSelect.value = '';
+        displayTransactions();
+    });
+}
 
 // Make deleteTransaction available globally
 window.deleteTransaction = deleteTransaction;
