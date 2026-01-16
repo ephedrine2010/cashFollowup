@@ -42,10 +42,15 @@
             <section class="card sales-section">
                 <!-- Sales Entry Form -->
                 <div class="sales-form-container">
-                    <h2>Add Daily Sales Record</h2>
+                    <div class="sales-form-header">
+                        <h2>Add Daily Sales Record</h2>
+                        <button type="button" class="start-cash-count-btn" onclick="openStartCashCountDialog()">
+                            💵 Start Cash Count
+                        </button>
+                    </div>
                     <form id="sales-form">
                         <div class="form-row">
-                            <div class="form-group">
+                            <div class="form-group required" style="grid-column: span 1;">
                                 <label for="sales-day-no">Day No.:</label>
                                 <input type="number" id="sales-day-no" min="1" required />
                             </div>
@@ -71,6 +76,10 @@
                             <div class="form-group">
                                 <label for="sales-rajhi">Rajhi:</label>
                                 <input type="number" id="sales-rajhi" step="0.01" min="0" value="0" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sales-gift">Gift:</label>
+                                <input type="number" id="sales-gift" step="0.01" min="0" value="0" />
                             </div>
                             <div class="form-group">
                                 <label for="sales-tamra">Tamra:</label>
@@ -120,8 +129,12 @@
                                 <input type="number" id="sales-total-cash" step="0.01" readonly value="0" />
                             </div>
                             <div class="form-group">
+                                <label for="sales-note">Note:</label>
+                                <input type="text" id="sales-note" placeholder="Add note for this day..." maxlength="100" />
+                            </div>
+                            <div class="form-group">
                                 <label>&nbsp;</label>
-                                <button type="submit" class="btn-primary">Add Sales Record</button>
+                                <button type="submit" class="add-sales-record-btn">Add Sales Record</button>
                             </div>
                         </div>
                     </form>
@@ -131,13 +144,18 @@
                 <div class="sales-table-container">
                     <div class="sales-header">
                         <h2>Sales Records</h2>
-                        <div class="year-navigation">
-                            <button class="year-nav-btn" id="prev-year-btn" onclick="changeYear(-1)" title="Previous Year">&lt;</button>
-                            <div class="year-display" id="year-display">
-                                <span class="year-label">Year:</span>
-                                <span class="year-value" id="current-year">2026</span>
+                        <div class="sales-controls">
+                            <button class="action-button download-excel-btn" onclick="openDownloadDialog()" title="Download as Excel">
+                                <span class="download-icon">⬇</span> Download Excel
+                            </button>
+                            <div class="year-navigation">
+                                <button class="year-nav-btn" id="prev-year-btn" onclick="changeYear(-1)" title="Previous Year">&lt;</button>
+                                <div class="year-display" id="year-display">
+                                    <span class="year-label">Year:</span>
+                                    <span class="year-value" id="current-year">2026</span>
+                                </div>
+                                <button class="year-nav-btn" id="next-year-btn" onclick="changeYear(1)" title="Next Year">&gt;</button>
                             </div>
-                            <button class="year-nav-btn" id="next-year-btn" onclick="changeYear(1)" title="Next Year">&gt;</button>
                         </div>
                     </div>
                     
@@ -155,6 +173,7 @@
                                     <th>Online</th>
                                     <th>STC</th>
                                     <th>Rajhi</th>
+                                    <th>Gift</th>
                                     <th>Tamra</th>
                                     <th class="plastic-column">Mada</th>
                                     <th class="plastic-column">Visa</th>
@@ -165,16 +184,17 @@
                                     <th class="total-cash-column">Total Cash</th>
                                     <th>Amanco</th>
                                     <th>Actions</th>
+                                    <th class="note-column">Note</th>
                                 </tr>
                             </thead>
                             <tbody id="sales-table-body">
                                 <tr class="empty-row">
-                                    <td colspan="16" class="empty-state">No sales records yet. Add your first record above!</td>
+                                    <td colspan="17" class="empty-state">No sales records yet. Add your first record above!</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr class="summary-row">
-                                    <td colspan="13" class="summary-label">Total Cash (Unchecked Amanco):</td>
+                                    <td colspan="15" class="summary-label">Total Cash (Unchecked Amanco):</td>
                                     <td id="total-cash-summary" class="summary-value total-cash-column">0.00</td>
                                     <td colspan="2"></td>
                                 </tr>
@@ -191,34 +211,22 @@
         <div class="spinner"></div>
     </div>
 
-    <!-- Multiple Values Dialog -->
-    <div id="values-dialog" class="dialog-overlay hidden">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h3 id="dialog-title">Enter Multiple Values</h3>
-                <button class="dialog-close" onclick="closeValuesDialog()">&times;</button>
-            </div>
-            <div class="dialog-body">
-                <div id="values-container" class="values-container">
-                    <!-- Value inputs will be generated dynamically -->
-                </div>
-                <button type="button" class="btn-add-more" onclick="addMoreValueInput()">+ Add More</button>
-            </div>
-            <div class="dialog-footer">
-                <div class="dialog-summary">
-                    <strong>Total:</strong> <span id="dialog-total">0.00</span>
-                </div>
-                <button type="button" class="btn-secondary" onclick="closeValuesDialog()">Cancel</button>
-                <button type="button" class="btn-primary" onclick="saveMultipleValues()">Save</button>
-            </div>
-        </div>
-    </div>
+    <!-- Dialog Containers -->
+    <div id="values-dialog-container"></div>
+    <div id="download-dialog-container"></div>
+    <div id="start-cash-count-dialog-container"></div>
 
     <!-- App Scripts (using ES6 modules) -->
     <script type="module" src="js/firebase-config.js"></script>
     <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/auth.js"></script>
-    <script type="module" src="js/sales.js"></script>
+    <script type="module" src="js/dialogs/dialog-loader.js"></script>
+    <script type="module" src="js/dialogs/card-buttons.js"></script>
+    <script type="module" src="js/dialogs/add-sales-record.js"></script>
+    <script type="module" src="js/sales-display.js"></script>
+    <script type="module" src="js/download.js"></script>
+    <script type="module" src="js/start-cash-count.js"></script>
     <script type="module" src="js/app.js"></script>
+    
 </body>
 </html>

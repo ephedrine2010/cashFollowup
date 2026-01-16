@@ -1,37 +1,48 @@
 // Import necessary functions
 import { collection, addDoc, query, where, orderBy, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { currentUser, registerAuthStateHandler, showLoading, hideLoading, db } from './auth.js';
+import { formatNumber } from './utils.js';
+import { initializeMultipleValuesButtons, multipleValues } from './dialogs/values-dialog.js';
 
 // DOM Elements
-const salesForm = document.getElementById('sales-form');
-const salesTableBody = document.getElementById('sales-table-body');
-const salesDayNoInput = document.getElementById('sales-day-no');
-const salesTotalInput = document.getElementById('sales-total');
-const salesOnAccountInput = document.getElementById('sales-on-account');
-const salesOnlineInput = document.getElementById('sales-online');
-const salesStcInput = document.getElementById('sales-stc');
-const salesRajhiInput = document.getElementById('sales-rajhi');
-const salesTamraInput = document.getElementById('sales-tamra');
-const salesMadaInput = document.getElementById('sales-mada');
-const salesVisaInput = document.getElementById('sales-visa');
-const salesMasterInput = document.getElementById('sales-master');
-const salesOtherInput = document.getElementById('sales-other');
-const salesVarianceInput = document.getElementById('sales-variance');
-const salesTotalPlasticInput = document.getElementById('sales-total-plastic');
-const salesTotalCashInput = document.getElementById('sales-total-cash');
-const monthsTabContainer = document.getElementById('months-tab');
+let salesForm, salesTableBody, salesDayNoInput, salesTotalInput, salesOnAccountInput;
+let salesOnlineInput, salesStcInput, salesRajhiInput, salesGiftInput, salesTamraInput;
+let salesMadaInput, salesVisaInput, salesMasterInput, salesOtherInput;
+let salesVarianceInput, salesTotalPlasticInput, salesTotalCashInput, salesNoteInput;
+let monthsTabContainer;
+
+// Initialize DOM elements when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    salesForm = document.getElementById('sales-form');
+    console.log('Sales form element found:', !!salesForm);
+    salesTableBody = document.getElementById('sales-table-body');
+    salesDayNoInput = document.getElementById('sales-day-no');
+    salesTotalInput = document.getElementById('sales-total');
+    salesOnAccountInput = document.getElementById('sales-on-account');
+    salesOnlineInput = document.getElementById('sales-online');
+    salesStcInput = document.getElementById('sales-stc');
+    salesRajhiInput = document.getElementById('sales-rajhi');
+    salesGiftInput = document.getElementById('sales-gift');
+    salesTamraInput = document.getElementById('sales-tamra');
+    salesMadaInput = document.getElementById('sales-mada');
+    salesVisaInput = document.getElementById('sales-visa');
+    salesMasterInput = document.getElementById('sales-master');
+    salesOtherInput = document.getElementById('sales-other');
+    salesVarianceInput = document.getElementById('sales-variance');
+    salesTotalPlasticInput = document.getElementById('sales-total-plastic');
+    salesTotalCashInput = document.getElementById('sales-total-cash');
+    salesNoteInput = document.getElementById('sales-note');
+    monthsTabContainer = document.getElementById('months-tab');
+    
+    // Initialize event listeners after DOM elements are available
+    initializeEventListeners();
+});
 
 // State
 let allSalesRecords = [];
 let currentMonth = getCurrentMonth(); // Current selected month
 let selectedYear = new Date().getFullYear(); // Selected year for viewing
 let unsubscribeSnapshot = null; // To unsubscribe from previous snapshots
-let currentDialogField = null; // Track which field is being edited
-let multipleValues = {
-    mada: [],
-    visa: [],
-    master: []
-}; // Store multiple values for each field
 
 // ============================================
 // Sales Tracking Functions
@@ -137,18 +148,19 @@ function calculateTotalPlastic() {
 }
 
 // Calculate Total Cash
-// Formula: Total Sales - (On Account + Online + STC + Rajhi + Tamra + Total Plastic) + Variance
+// Formula: Total Sales - (On Account + Online + STC + Rajhi + Gift + Tamra + Total Plastic) + Variance
 function calculateTotalCash() {
     const totalSales = parseFloat(salesTotalInput.value) || 0;
     const onAccount = parseFloat(salesOnAccountInput.value) || 0;
     const online = parseFloat(salesOnlineInput.value) || 0;
     const stc = parseFloat(salesStcInput.value) || 0;
     const rajhi = parseFloat(salesRajhiInput.value) || 0;
+    const gift = parseFloat(salesGiftInput.value) || 0;
     const tamra = parseFloat(salesTamraInput.value) || 0;
     const totalPlastic = calculateTotalPlastic();
     const variance = parseFloat(salesVarianceInput.value) || 0;
     
-    return totalSales - (onAccount + online + stc + rajhi + tamra + totalPlastic) + variance;
+    return totalSales - (onAccount + online + stc + rajhi + gift + tamra + totalPlastic) + variance;
 }
 
 // Update calculated fields in real-time
@@ -162,89 +174,104 @@ function updateCalculatedFields() {
     salesTotalCashInput.value = totalCash.toFixed(2);
 }
 
-// Add event listeners to all input fields for real-time calculation
-[salesTotalInput, salesOnAccountInput, salesOnlineInput, salesStcInput, 
- salesRajhiInput, salesTamraInput, salesMadaInput, salesVisaInput, 
- salesMasterInput, salesOtherInput, salesVarianceInput].forEach(input => {
-    input.addEventListener('input', updateCalculatedFields);
-});
+// Initialize event listeners
+function initializeEventListeners() {
+    // Add event listeners to all input fields for real-time calculation
+    [salesTotalInput, salesOnAccountInput, salesOnlineInput, salesStcInput, 
+     salesRajhiInput, salesGiftInput, salesTamraInput, salesMadaInput, salesVisaInput, 
+     salesMasterInput, salesOtherInput, salesVarianceInput].forEach(input => {
+        input.addEventListener('input', updateCalculatedFields);
+    });
 
-// Initialize sales when user logs in
-registerAuthStateHandler((user) => {
-    if (user) {
-        initializeDayNo(); // Set day number when user logs in
-        generateMonthButtons(); // Generate month buttons
-        loadSalesRecords();
-        initializeMultipleValuesButtons(); // Initialize dialog buttons
-    } else {
-        allSalesRecords = [];
-        if (monthsTabContainer) {
-            monthsTabContainer.innerHTML = '';
+    // Add sales record form submit listener
+    salesForm.addEventListener('submit', async (e) => {
+        console.log('Form submit event triggered');
+        e.preventDefault();
+        
+        console.log('Current user:', currentUser);
+        if (!currentUser) {
+            alert('Please login first');
+            return;
         }
-    }
-});
+        
+        const storeCode = getStoreCode();
+        console.log('Store code:', storeCode);
+        if (!storeCode) {
+            alert('Invalid user email format. Email must start with a 4-digit store code.');
+            return;
+        }
+        
+        console.log('Creating sales record...');
 
-// Add sales record
-salesForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    if (!currentUser) {
-        alert('Please login first');
-        return;
-    }
-
-    const storeCode = getStoreCode();
-    if (!storeCode) {
-        alert('Invalid user email format. Email must start with a 4-digit store code.');
-        return;
-    }
-
-    const salesRecord = {
-        dayNo: parseInt(salesDayNoInput.value),
-        totalSales: parseFloat(salesTotalInput.value),
-        onAccount: parseFloat(salesOnAccountInput.value) || 0,
-        online: parseFloat(salesOnlineInput.value) || 0,
-        stc: parseFloat(salesStcInput.value) || 0,
-        rajhi: parseFloat(salesRajhiInput.value) || 0,
-        tamra: parseFloat(salesTamraInput.value) || 0,
-        mada: parseFloat(salesMadaInput.value) || 0,
-        visa: parseFloat(salesVisaInput.value) || 0,
-        master: parseFloat(salesMasterInput.value) || 0,
-        other: parseFloat(salesOtherInput.value) || 0,
-        amanco: false, // Default to unchecked
-        variance: parseFloat(salesVarianceInput.value) || 0,
-        totalPlastic: calculateTotalPlastic(),
-        totalCash: calculateTotalCash(),
-        // Store multiple values for mada, visa, and master
-        madaValues: multipleValues.mada.length > 0 ? multipleValues.mada : null,
-        visaValues: multipleValues.visa.length > 0 ? multipleValues.visa : null,
-        masterValues: multipleValues.master.length > 0 ? multipleValues.master : null,
-        createdAt: serverTimestamp()
-    };
-
-    showLoading();
-    try {
-        // New Firebase structure: store-code > year > month > documents
-        // Use selectedYear for data operations
-        const monthCollectionPath = `${storeCode}/${selectedYear}/${currentMonth}`;
-        await addDoc(collection(db, monthCollectionPath), salesRecord);
-        salesForm.reset();
-        // Reset multiple values
-        multipleValues = {
-            mada: [],
-            visa: [],
-            master: []
+        const salesRecord = {
+            dayNo: parseInt(salesDayNoInput.value),
+            totalSales: parseFloat(salesTotalInput.value),
+            onAccount: parseFloat(salesOnAccountInput.value) || 0,
+            online: parseFloat(salesOnlineInput.value) || 0,
+            stc: parseFloat(salesStcInput.value) || 0,
+            rajhi: parseFloat(salesRajhiInput.value) || 0,
+            gift: parseFloat(salesGiftInput.value) || 0,
+            tamra: parseFloat(salesTamraInput.value) || 0,
+            mada: parseFloat(salesMadaInput.value) || 0,
+            visa: parseFloat(salesVisaInput.value) || 0,
+            master: parseFloat(salesMasterInput.value) || 0,
+            other: parseFloat(salesOtherInput.value) || 0,
+            amanco: false, // Default to unchecked
+            variance: parseFloat(salesVarianceInput.value) || 0,
+            note: salesNoteInput.value.trim() || null, // Add note field
+            totalPlastic: calculateTotalPlastic(),
+            totalCash: calculateTotalCash(),
+            // Store multiple values for mada, visa, and master
+            madaValues: multipleValues.mada.length > 0 ? multipleValues.mada : null,
+            visaValues: multipleValues.visa.length > 0 ? multipleValues.visa : null,
+            masterValues: multipleValues.master.length > 0 ? multipleValues.master : null,
+            createdAt: serverTimestamp()
         };
-        initializeDayNo(); // Reset day number after form reset
-        updateCalculatedFields(); // Reset calculated fields
-        alert('Sales record added successfully!');
-    } catch (error) {
-        console.error('Error adding sales record:', error);
-        alert(`Failed to add sales record: ${error.message}`);
-    } finally {
-        hideLoading();
-    }
-});
+
+        showLoading();
+        try {
+            // New Firebase structure: store-code > year > month > documents
+            // Use selectedYear for data operations
+            const monthCollectionPath = `${storeCode}/${selectedYear}/${currentMonth}`;
+            await addDoc(collection(db, monthCollectionPath), salesRecord);
+            salesForm.reset();
+            salesNoteInput.value = ''; // Clear the note field separately
+            // Reset multiple values
+            multipleValues = {
+                mada: [],
+                visa: [],
+                master: []
+            };
+            initializeDayNo(); // Reset day number after form reset
+            updateCalculatedFields(); // Reset calculated fields
+            alert('Sales record added successfully!');
+        } catch (error) {
+            console.error('Error adding sales record:', error);
+            alert(`Failed to add sales record: ${error.message}`);
+        } finally {
+            hideLoading();
+        }
+    });
+
+    // Initialize sales when user logs in
+    registerAuthStateHandler((user) => {
+        if (user) {
+            initializeDayNo(); // Set day number when user logs in
+            generateMonthButtons(); // Generate month buttons
+            loadSalesRecords();
+            // Initialize dialog buttons after a longer delay to ensure DOM is ready
+            setTimeout(() => {
+                console.log('Calling initializeMultipleValuesButtons from auth handler');
+                initializeMultipleValuesButtons();
+            }, 500);
+        } else {
+            allSalesRecords = [];
+            if (monthsTabContainer) {
+                monthsTabContainer.innerHTML = '';
+            }
+        }
+    });
+}
 
 // Load sales records
 function loadSalesRecords() {
@@ -315,19 +342,20 @@ function displaySalesRecords() {
         return `
             <tr>
                 <td class="day-no-column">${record.dayNo}</td>
-                <td>${record.totalSales.toFixed(2)}</td>
-                <td>${record.onAccount.toFixed(2)}</td>
-                <td>${record.online.toFixed(2)}</td>
-                <td>${record.stc.toFixed(2)}</td>
-                <td>${record.rajhi.toFixed(2)}</td>
-                <td>${record.tamra.toFixed(2)}</td>
-                <td class="plastic-column">${record.mada.toFixed(2)}</td>
-                <td class="plastic-column">${record.visa.toFixed(2)}</td>
-                <td class="plastic-column">${record.master.toFixed(2)}</td>
-                <td class="plastic-column">${record.other.toFixed(2)}</td>
-                <td class="total-plastic-column">${totalPlastic.toFixed(2)}</td>
-                <td class="${varianceClass}">${variance.toFixed(2)}</td>
-                <td class="total-cash-column">${totalCash.toFixed(2)}</td>
+                <td>${formatNumber(record.totalSales)}</td>
+                <td>${formatNumber(record.onAccount)}</td>
+                <td>${formatNumber(record.online)}</td>
+                <td>${formatNumber(record.stc)}</td>
+                <td>${formatNumber(record.rajhi)}</td>
+                <td>${formatNumber(record.gift || 0)}</td>
+                <td>${formatNumber(record.tamra)}</td>
+                <td class="plastic-column">${formatNumber(record.mada)}</td>
+                <td class="plastic-column">${formatNumber(record.visa)}</td>
+                <td class="plastic-column">${formatNumber(record.master)}</td>
+                <td class="plastic-column">${formatNumber(record.other)}</td>
+                <td class="total-plastic-column">${formatNumber(totalPlastic)}</td>
+                <td class="${varianceClass}">${formatNumber(variance)}</td>
+                <td class="total-cash-column">${formatNumber(totalCash)}</td>
                 <td>
                     <input type="checkbox" 
                            class="amanco-checkbox" 
@@ -338,6 +366,7 @@ function displaySalesRecords() {
                 <td>
                     <button class="delete-btn" onclick="deleteSalesRecord('${record.id}')">Delete</button>
                 </td>
+                <td class="note-cell">${record.note || ''}</td>
             </tr>
         `;
     }).join('');
@@ -406,151 +435,8 @@ async function toggleAmanco(recordId, isChecked) {
     }
 }
 
-// ============================================
-// Multiple Values Dialog Functions
-// ============================================
-
-// Open the values dialog for a specific field
-function openValuesDialog(fieldName) {
-    currentDialogField = fieldName;
-    const dialog = document.getElementById('values-dialog');
-    const dialogTitle = document.getElementById('dialog-title');
-    const valuesContainer = document.getElementById('values-container');
-    
-    // Set dialog title
-    dialogTitle.textContent = `Enter Multiple ${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} Values`;
-    
-    // Clear and populate with existing values or create 5 empty inputs
-    valuesContainer.innerHTML = '';
-    const values = multipleValues[fieldName];
-    
-    if (values && values.length > 0) {
-        values.forEach((value, index) => {
-            createValueInput(valuesContainer, value, index);
-        });
-    } else {
-        // Create 5 initial empty inputs
-        for (let i = 0; i < 5; i++) {
-            createValueInput(valuesContainer, 0, i);
-        }
-    }
-    
-    // Show dialog
-    dialog.classList.remove('hidden');
-    updateDialogTotal();
-}
-
-// Close the dialog
-function closeValuesDialog() {
-    const dialog = document.getElementById('values-dialog');
-    dialog.classList.add('hidden');
-    currentDialogField = null;
-}
-
-// Create a value input row
-function createValueInput(container, value = 0, index = 0) {
-    const row = document.createElement('div');
-    row.className = 'value-input-row';
-    row.dataset.index = index;
-    
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.step = '0.01';
-    input.min = '0';
-    input.value = value;
-    input.placeholder = `Value ${index + 1}`;
-    input.className = 'value-input';
-    input.addEventListener('input', updateDialogTotal);
-    
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'remove-value-btn';
-    removeBtn.textContent = '×';
-    removeBtn.onclick = () => removeValueInput(row);
-    
-    row.appendChild(input);
-    row.appendChild(removeBtn);
-    container.appendChild(row);
-}
-
-// Add more value inputs
-function addMoreValueInput() {
-    const container = document.getElementById('values-container');
-    const currentCount = container.children.length;
-    
-    // Add 5 more inputs
-    for (let i = 0; i < 5; i++) {
-        createValueInput(container, 0, currentCount + i);
-    }
-}
-
-// Remove a value input
-function removeValueInput(row) {
-    row.remove();
-    updateDialogTotal();
-}
-
-// Update the dialog total
-function updateDialogTotal() {
-    const inputs = document.querySelectorAll('.value-input');
-    let total = 0;
-    
-    inputs.forEach(input => {
-        const value = parseFloat(input.value) || 0;
-        total += value;
-    });
-    
-    document.getElementById('dialog-total').textContent = total.toFixed(2);
-}
-
-// Save multiple values
-function saveMultipleValues() {
-    if (!currentDialogField) return;
-    
-    const inputs = document.querySelectorAll('.value-input');
-    const values = [];
-    let total = 0;
-    
-    inputs.forEach(input => {
-        const value = parseFloat(input.value) || 0;
-        if (value > 0) { // Only store non-zero values
-            values.push(value);
-            total += value;
-        }
-    });
-    
-    // Store the values
-    multipleValues[currentDialogField] = values;
-    
-    // Update the corresponding input field
-    const fieldInput = document.getElementById(`sales-${currentDialogField}`);
-    if (fieldInput) {
-        fieldInput.value = total.toFixed(2);
-        // Trigger the input event to update calculated fields
-        fieldInput.dispatchEvent(new Event('input'));
-    }
-    
-    closeValuesDialog();
-}
-
-// Initialize event listeners for '+' buttons
-function initializeMultipleValuesButtons() {
-    document.querySelectorAll('.add-values-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const fieldName = btn.dataset.field;
-            openValuesDialog(fieldName);
-        });
-    });
-}
-
 // Make functions available globally
 window.deleteSalesRecord = deleteSalesRecord;
 window.toggleAmanco = toggleAmanco;
-window.openValuesDialog = openValuesDialog;
-window.closeValuesDialog = closeValuesDialog;
-window.addMoreValueInput = addMoreValueInput;
-window.saveMultipleValues = saveMultipleValues;
-window.removeValueInput = removeValueInput;
-window.updateDialogTotal = updateDialogTotal;
 
 console.log('Sales module initialized');

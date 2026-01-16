@@ -22,6 +22,16 @@ export function formatCurrency(amount, currency = '$') {
 }
 
 /**
+ * Format number to 2 decimal places, showing empty string for 0.00
+ * @param {number} value - Number to format
+ * @returns {string} Formatted number or empty string if 0
+ */
+export function formatNumber(value) {
+    const num = parseFloat(value) || 0;
+    return num === 0 ? '' : num.toFixed(2);
+}
+
+/**
  * Calculate percentage
  * @param {number} value - Value
  * @param {number} total - Total

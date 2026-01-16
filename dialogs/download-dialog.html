@@ -1,0 +1,46 @@
+<!-- Download Excel Dialog -->
+<div id="download-dialog" class="dialog-overlay hidden">
+    <div class="dialog-content download-dialog-content">
+        <div class="dialog-header">
+            <h3 id="download-dialog-title">Download Sales Data as Excel</h3>
+            <button class="dialog-close" onclick="closeDownloadDialog()">&times;</button>
+        </div>
+        <div class="dialog-body">
+            <div class="download-year-info">
+                <label>Selected Year:</label>
+                <span id="download-year-display" class="year-badge">2026</span>
+            </div>
+            
+            <div class="download-month-selection">
+                <h4>Select Month(s) to Download:</h4>
+                <div class="download-options">
+                    <label class="download-option">
+                        <input type="checkbox" id="download-all-months" onchange="toggleAllMonths(this.checked)">
+                        <span class="option-label">All Months</span>
+                    </label>
+                </div>
+                <div class="month-checkboxes" id="month-checkboxes">
+                    <!-- Month checkboxes will be generated dynamically -->
+                </div>
+            </div>
+            
+            <div class="download-format-options">
+                <h4>Download Options:</h4>
+                <label class="download-option">
+                    <input type="radio" name="download-format" value="single" checked>
+                    <span class="option-label">Single file with all selected months</span>
+                </label>
+                <label class="download-option">
+                    <input type="radio" name="download-format" value="separate">
+                    <span class="option-label">Separate file for each month</span>
+                </label>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn-secondary" onclick="closeDownloadDialog()">Cancel</button>
+            <button type="button" class="btn-primary" onclick="startDownload()">
+                <span class="download-icon">⬇</span> Download
+            </button>
+        </div>
+    </div>
+</div>
