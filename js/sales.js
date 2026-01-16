@@ -12,6 +12,7 @@ const salesOnAccountInput = document.getElementById('sales-on-account');
 const salesOnlineInput = document.getElementById('sales-online');
 const salesStcInput = document.getElementById('sales-stc');
 const salesRajhiInput = document.getElementById('sales-rajhi');
+const salesGiftInput = document.getElementById('sales-gift');
 const salesTamraInput = document.getElementById('sales-tamra');
 const salesMadaInput = document.getElementById('sales-mada');
 const salesVisaInput = document.getElementById('sales-visa');
@@ -20,6 +21,7 @@ const salesOtherInput = document.getElementById('sales-other');
 const salesVarianceInput = document.getElementById('sales-variance');
 const salesTotalPlasticInput = document.getElementById('sales-total-plastic');
 const salesTotalCashInput = document.getElementById('sales-total-cash');
+const salesNoteInput = document.getElementById('sales-note');
 const monthsTabContainer = document.getElementById('months-tab');
 
 // State
@@ -138,18 +140,19 @@ function calculateTotalPlastic() {
 }
 
 // Calculate Total Cash
-// Formula: Total Sales - (On Account + Online + STC + Rajhi + Tamra + Total Plastic) + Variance
+// Formula: Total Sales - (On Account + Online + STC + Rajhi + Gift + Tamra + Total Plastic) + Variance
 function calculateTotalCash() {
     const totalSales = parseFloat(salesTotalInput.value) || 0;
     const onAccount = parseFloat(salesOnAccountInput.value) || 0;
     const online = parseFloat(salesOnlineInput.value) || 0;
     const stc = parseFloat(salesStcInput.value) || 0;
     const rajhi = parseFloat(salesRajhiInput.value) || 0;
+    const gift = parseFloat(salesGiftInput.value) || 0;
     const tamra = parseFloat(salesTamraInput.value) || 0;
     const totalPlastic = calculateTotalPlastic();
     const variance = parseFloat(salesVarianceInput.value) || 0;
     
-    return totalSales - (onAccount + online + stc + rajhi + tamra + totalPlastic) + variance;
+    return totalSales - (onAccount + online + stc + rajhi + gift + tamra + totalPlastic) + variance;
 }
 
 // Update calculated fields in real-time
@@ -165,7 +168,7 @@ function updateCalculatedFields() {
 
 // Add event listeners to all input fields for real-time calculation
 [salesTotalInput, salesOnAccountInput, salesOnlineInput, salesStcInput, 
- salesRajhiInput, salesTamraInput, salesMadaInput, salesVisaInput, 
+ salesRajhiInput, salesGiftInput, salesTamraInput, salesMadaInput, salesVisaInput, 
  salesMasterInput, salesOtherInput, salesVarianceInput].forEach(input => {
     input.addEventListener('input', updateCalculatedFields);
 });
@@ -207,6 +210,7 @@ salesForm.addEventListener('submit', async (e) => {
         online: parseFloat(salesOnlineInput.value) || 0,
         stc: parseFloat(salesStcInput.value) || 0,
         rajhi: parseFloat(salesRajhiInput.value) || 0,
+        gift: parseFloat(salesGiftInput.value) || 0,
         tamra: parseFloat(salesTamraInput.value) || 0,
         mada: parseFloat(salesMadaInput.value) || 0,
         visa: parseFloat(salesVisaInput.value) || 0,
@@ -216,6 +220,7 @@ salesForm.addEventListener('submit', async (e) => {
         variance: parseFloat(salesVarianceInput.value) || 0,
         totalPlastic: calculateTotalPlastic(),
         totalCash: calculateTotalCash(),
+        note: salesNoteInput.value.trim() || '',
         // Store multiple values for mada, visa, and master
         madaValues: multipleValues.mada.length > 0 ? multipleValues.mada : null,
         visaValues: multipleValues.visa.length > 0 ? multipleValues.visa : null,
@@ -296,7 +301,7 @@ function displaySalesRecords() {
     if (allSalesRecords.length === 0) {
         salesTableBody.innerHTML = `
             <tr class="empty-row">
-                <td colspan="16" class="empty-state">No sales records yet. Add your first record above!</td>
+                <td colspan="18" class="empty-state">No sales records yet. Add your first record above!</td>
             </tr>
         `;
         updateTotalCashSummary();
@@ -321,6 +326,7 @@ function displaySalesRecords() {
                 <td>${formatEmptyZero(record.online)}</td>
                 <td>${formatEmptyZero(record.stc)}</td>
                 <td>${formatEmptyZero(record.rajhi)}</td>
+                <td>${formatEmptyZero(record.gift)}</td>
                 <td>${formatEmptyZero(record.tamra)}</td>
                 <td class="plastic-column">${formatEmptyZero(record.mada)}</td>
                 <td class="plastic-column">${formatEmptyZero(record.visa)}</td>
@@ -339,6 +345,7 @@ function displaySalesRecords() {
                 <td>
                     <button class="delete-btn" onclick="deleteSalesRecord('${record.id}')">Delete</button>
                 </td>
+                <td>${record.note || ''}</td>
             </tr>
         `;
     }).join('');

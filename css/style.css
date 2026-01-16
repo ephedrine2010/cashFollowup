@@ -235,12 +235,12 @@ header h1 {
 
 /* Form */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 8px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -248,7 +248,7 @@ header h1 {
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 12px;
+    padding: 8px 10px;
     border: 1px solid var(--border-color);
     border-radius: 5px;
     font-size: 14px;
@@ -575,10 +575,11 @@ header h1 {
 }
 
 .sales-form-container {
-    background: var(--light-bg);
+    background: #e9ecef;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 30px;
+    border: 1px solid var(--border-color);
 }
 
 .title-with-actions {
@@ -612,8 +613,34 @@ header h1 {
 .form-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.form-row-tight {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.form-row-mixed {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 8px;
+}
+
+.form-group-sm {
+    width: 100%;
+    max-width: 150px;
+}
+
+.form-group-md {
+    width: 100%;
+    max-width: 250px;
+}
+
+.form-group-flex {
+    flex: 1;
 }
 
 /* Sales Table */
