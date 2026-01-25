@@ -210,23 +210,53 @@
 
     <!-- Multiple Values Dialog -->
     <div id="values-dialog" class="dialog-overlay hidden">
-        <div class="dialog-content">
+        <div class="dialog-content card-values-dialog">
             <div class="dialog-header">
-                <h3 id="dialog-title">Enter Multiple Values</h3>
+                <h3 id="dialog-title">Enter Card Payment Values</h3>
                 <button class="dialog-close" onclick="closeValuesDialog()">&times;</button>
             </div>
             <div class="dialog-body">
-                <div id="values-container" class="values-container">
-                    <!-- Value inputs will be generated dynamically -->
+                <div class="card-groups-container">
+                    <!-- Mada Group -->
+                    <div class="card-value-group">
+                        <h4 class="group-title">Mada</h4>
+                        <div id="values-container-mada" class="values-container" data-field="mada">
+                            <!-- Value inputs will be generated dynamically -->
+                        </div>
+                        <button type="button" class="btn-add-more" onclick="addMoreValueInput('mada')">+ Add More</button>
+                        <div class="group-summary">
+                            <strong>Mada Total:</strong> <span id="dialog-total-mada">0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Visa Group -->
+                    <div class="card-value-group">
+                        <h4 class="group-title">Visa</h4>
+                        <div id="values-container-visa" class="values-container" data-field="visa">
+                            <!-- Value inputs will be generated dynamically -->
+                        </div>
+                        <button type="button" class="btn-add-more" onclick="addMoreValueInput('visa')">+ Add More</button>
+                        <div class="group-summary">
+                            <strong>Visa Total:</strong> <span id="dialog-total-visa">0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Master Group -->
+                    <div class="card-value-group">
+                        <h4 class="group-title">Master</h4>
+                        <div id="values-container-master" class="values-container" data-field="master">
+                            <!-- Value inputs will be generated dynamically -->
+                        </div>
+                        <button type="button" class="btn-add-more" onclick="addMoreValueInput('master')">+ Add More</button>
+                        <div class="group-summary">
+                            <strong>Master Total:</strong> <span id="dialog-total-master">0.00</span>
+                        </div>
+                    </div>
                 </div>
-                <button type="button" class="btn-add-more" onclick="addMoreValueInput()">+ Add More</button>
             </div>
             <div class="dialog-footer">
-                <div class="dialog-summary">
-                    <strong>Total:</strong> <span id="dialog-total">0.00</span>
-                </div>
                 <button type="button" class="btn-secondary" onclick="closeValuesDialog()">Cancel</button>
-                <button type="button" class="btn-primary" onclick="saveMultipleValues()">Save</button>
+                <button type="button" class="btn-primary" onclick="saveMultipleValues()">Save All</button>
             </div>
         </div>
     </div>

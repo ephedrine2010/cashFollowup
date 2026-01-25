@@ -29,7 +29,6 @@ let allSalesRecords = [];
 let currentMonth = getCurrentMonth(); // Current selected month
 let selectedYear = new Date().getFullYear(); // Selected year for viewing
 let unsubscribeSnapshot = null; // To unsubscribe from previous snapshots
-let currentDialogField = null; // Track which field is being edited
 let multipleValues = {
     mada: [],
     visa: [],
@@ -418,48 +417,46 @@ async function toggleAmanco(recordId, isChecked) {
 // Multiple Values Dialog Functions
 // ============================================
 
-// Open the values dialog for a specific field
-function openValuesDialog(fieldName) {
-    currentDialogField = fieldName;
+// Open the unified values dialog for all card types
+function openValuesDialog() {
     const dialog = document.getElementById('values-dialog');
-    const dialogTitle = document.getElementById('dialog-title');
-    const valuesContainer = document.getElementById('values-container');
     
-    // Set dialog title
-    dialogTitle.textContent = `Enter Multiple ${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} Values`;
-    
-    // Clear and populate with existing values or create 5 empty inputs
-    valuesContainer.innerHTML = '';
-    const values = multipleValues[fieldName];
-    
-    if (values && values.length > 0) {
-        values.forEach((value, index) => {
-            createValueInput(valuesContainer, value, index);
-        });
-    } else {
-        // Create 5 initial empty inputs
-        for (let i = 0; i < 5; i++) {
-            createValueInput(valuesContainer, 0, i);
+    // Initialize all three groups (mada, visa, master)
+    ['mada', 'visa', 'master'].forEach(fieldName => {
+        const container = document.getElementById(`values-container-${fieldName}`);
+        container.innerHTML = '';
+        
+        const values = multipleValues[fieldName];
+        
+        if (values && values.length > 0) {
+            values.forEach((value, index) => {
+                createValueInput(container, fieldName, value, index);
+            });
+        } else {
+            // Create 5 initial empty inputs
+            for (let i = 0; i < 5; i++) {
+                createValueInput(container, fieldName, 0, i);
+            }
         }
-    }
+    });
     
     // Show dialog
     dialog.classList.remove('hidden');
-    updateDialogTotal();
+    updateDialogTotals();
 }
 
 // Close the dialog
 function closeValuesDialog() {
     const dialog = document.getElementById('values-dialog');
     dialog.classList.add('hidden');
-    currentDialogField = null;
 }
 
-// Create a value input row
-function createValueInput(container, value = 0, index = 0) {
+// Create a value input row for a specific field
+function createValueInput(container, fieldName, value = 0, index = 0) {
     const row = document.createElement('div');
     row.className = 'value-input-row';
     row.dataset.index = index;
+    row.dataset.field = fieldName;
     
     const input = document.createElement('input');
     input.type = 'number';
@@ -468,39 +465,40 @@ function createValueInput(container, value = 0, index = 0) {
     input.value = value;
     input.placeholder = `Value ${index + 1}`;
     input.className = 'value-input';
-    input.addEventListener('input', updateDialogTotal);
+    input.addEventListener('input', () => updateDialogTotal(fieldName));
     
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.className = 'remove-value-btn';
     removeBtn.textContent = '×';
-    removeBtn.onclick = () => removeValueInput(row);
+    removeBtn.onclick = () => removeValueInput(row, fieldName);
     
     row.appendChild(input);
     row.appendChild(removeBtn);
     container.appendChild(row);
 }
 
-// Add more value inputs
-function addMoreValueInput() {
-    const container = document.getElementById('values-container');
+// Add more value inputs for a specific field
+function addMoreValueInput(fieldName) {
+    const container = document.getElementById(`values-container-${fieldName}`);
     const currentCount = container.children.length;
     
     // Add 5 more inputs
     for (let i = 0; i < 5; i++) {
-        createValueInput(container, 0, currentCount + i);
+        createValueInput(container, fieldName, 0, currentCount + i);
     }
 }
 
 // Remove a value input
-function removeValueInput(row) {
+function removeValueInput(row, fieldName) {
     row.remove();
-    updateDialogTotal();
+    updateDialogTotal(fieldName);
 }
 
-// Update the dialog total
-function updateDialogTotal() {
-    const inputs = document.querySelectorAll('.value-input');
+// Update the dialog total for a specific field
+function updateDialogTotal(fieldName) {
+    const container = document.getElementById(`values-container-${fieldName}`);
+    const inputs = container.querySelectorAll('.value-input');
     let total = 0;
     
     inputs.forEach(input => {
@@ -508,35 +506,44 @@ function updateDialogTotal() {
         total += value;
     });
     
-    document.getElementById('dialog-total').textContent = total.toFixed(2);
+    document.getElementById(`dialog-total-${fieldName}`).textContent = total.toFixed(2);
 }
 
-// Save multiple values
+// Update all dialog totals
+function updateDialogTotals() {
+    ['mada', 'visa', 'master'].forEach(fieldName => {
+        updateDialogTotal(fieldName);
+    });
+}
+
+// Save multiple values for all three fields
 function saveMultipleValues() {
-    if (!currentDialogField) return;
-    
-    const inputs = document.querySelectorAll('.value-input');
-    const values = [];
-    let total = 0;
-    
-    inputs.forEach(input => {
-        const value = parseFloat(input.value) || 0;
-        if (value > 0) { // Only store non-zero values
-            values.push(value);
-            total += value;
+    // Process all three fields
+    ['mada', 'visa', 'master'].forEach(fieldName => {
+        const container = document.getElementById(`values-container-${fieldName}`);
+        const inputs = container.querySelectorAll('.value-input');
+        const values = [];
+        let total = 0;
+        
+        inputs.forEach(input => {
+            const value = parseFloat(input.value) || 0;
+            if (value > 0) { // Only store non-zero values
+                values.push(value);
+                total += value;
+            }
+        });
+        
+        // Store the values
+        multipleValues[fieldName] = values;
+        
+        // Update the corresponding input field on the main form
+        const fieldInput = document.getElementById(`sales-${fieldName}`);
+        if (fieldInput) {
+            fieldInput.value = total.toFixed(2);
+            // Trigger the input event to update calculated fields
+            fieldInput.dispatchEvent(new Event('input'));
         }
     });
-    
-    // Store the values
-    multipleValues[currentDialogField] = values;
-    
-    // Update the corresponding input field
-    const fieldInput = document.getElementById(`sales-${currentDialogField}`);
-    if (fieldInput) {
-        fieldInput.value = total.toFixed(2);
-        // Trigger the input event to update calculated fields
-        fieldInput.dispatchEvent(new Event('input'));
-    }
     
     closeValuesDialog();
 }
@@ -545,8 +552,8 @@ function saveMultipleValues() {
 function initializeMultipleValuesButtons() {
     document.querySelectorAll('.add-values-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const fieldName = btn.dataset.field;
-            openValuesDialog(fieldName);
+            // All buttons open the same unified dialog
+            openValuesDialog();
         });
     });
 }
@@ -559,6 +566,5 @@ window.closeValuesDialog = closeValuesDialog;
 window.addMoreValueInput = addMoreValueInput;
 window.saveMultipleValues = saveMultipleValues;
 window.removeValueInput = removeValueInput;
-window.updateDialogTotal = updateDialogTotal;
 
 console.log('Sales module initialized');
