@@ -135,7 +135,7 @@ function calculateTotalPlastic() {
     const master = parseFloat(salesMasterInput.value) || 0;
     const other = parseFloat(salesOtherInput.value) || 0;
     
-    return mada + visa + master + other;
+    return parseFloat((mada + visa + master + other).toFixed(2));
 }
 
 // Calculate Total Cash
@@ -151,7 +151,7 @@ function calculateTotalCash() {
     const totalPlastic = calculateTotalPlastic();
     const variance = parseFloat(salesVarianceInput.value) || 0;
     
-    return totalSales - (onAccount + online + stc + rajhi + gift + tamra + totalPlastic) + variance;
+    return parseFloat((totalSales - (onAccount + online + stc + rajhi + gift + tamra + totalPlastic) + variance).toFixed(2));
 }
 
 // Update calculated fields in real-time
