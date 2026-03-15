@@ -1238,6 +1238,20 @@ header h1 {
     justify-content: flex-end;
 }
 
+/* Petty cash reminder message */
+.reminder-msg {
+    margin-top: 4px;
+    padding: 4px 8px;
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: right;
+    direction: rtl;
+}
+
 /* Responsive: Stack vertically on smaller screens */
 @media (max-width: 1024px) {
     .card-groups-container {

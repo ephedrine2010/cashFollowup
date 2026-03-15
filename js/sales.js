@@ -123,10 +123,21 @@ window.changeYear = changeYear;
 // Initialize Day No. with previous day
 function initializeDayNo() {
     const today = new Date();
-    const dayNo = today.getDate(); // Gets the day of the month (1-31)
-    const previousDay = dayNo - 1; // Set to previous day
-    salesDayNoInput.value = previousDay > 0 ? previousDay : 1; // If day is 1, set to 1 (minimum)
+    const dayNo = today.getDate();
+    const previousDay = dayNo - 1;
+    salesDayNoInput.value = previousDay > 0 ? previousDay : 1;
+    updatePettyCashReminder();
 }
+
+// Show/hide petty cash reminder when Day No. is 10
+function updatePettyCashReminder() {
+    const reminder = document.getElementById('petty-cash-reminder');
+    if (!reminder) return;
+    const dayNo = parseInt(salesDayNoInput.value) || 0;
+    reminder.classList.toggle('hidden', dayNo !== 10);
+}
+
+salesDayNoInput.addEventListener('input', updatePettyCashReminder);
 
 // Calculate Total Plastic (Mada + Visa + Master + Other)
 function calculateTotalPlastic() {
