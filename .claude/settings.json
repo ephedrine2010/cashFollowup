@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p js/lib)",
+      "Bash(curl -fsSL -o js/lib/xlsx.mjs \"https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs\")"
+    ]
+  }
+}

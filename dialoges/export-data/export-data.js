@@ -3,7 +3,7 @@
  */
 
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
+import * as XLSX from "../../js/lib/xlsx.mjs";
 import { currentUser, showLoading, hideLoading, db } from '../../js/auth.js';
 
 const MONTHS_NAMES = [
