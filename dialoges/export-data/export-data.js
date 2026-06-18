@@ -3,6 +3,7 @@
  */
 
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
 import { currentUser, showLoading, hideLoading, db } from '../../js/auth.js';
 
 const MONTHS_NAMES = [
@@ -154,6 +155,7 @@ export function initExportData() {
                             'Online': data.online || 0,
                             'STC': data.stc || 0,
                             'Rajhi': data.rajhi || 0,
+                            'Gift': data.gift || 0,
                             'Tamra': data.tamra || 0,
                             'Mada': data.mada || 0,
                             'Visa': data.visa || 0,
@@ -184,12 +186,16 @@ export function initExportData() {
                 return a['Day No'] - b['Day No'];
             });
 
-            // Convert to CSV
-            const csv = convertToCSV(allData);
-            
-            // Download CSV file
-            downloadCSV(csv, `sales_data_${storeCode}_${selectedMonths[0]}_to_${selectedMonths[selectedMonths.length - 1]}.csv`);
-            
+            // Build a real .xlsx workbook so numeric fields stay numbers
+            // (json_to_sheet writes JS numbers as numeric cells, avoiding Excel's
+            // locale-dependent "text" fallback that prefixes values with ').
+            const worksheet = XLSX.utils.json_to_sheet(allData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sales Data');
+
+            const filename = `sales_data_${storeCode}_${selectedMonths[0]}_to_${selectedMonths[selectedMonths.length - 1]}.xlsx`;
+            XLSX.writeFile(workbook, filename);
+
             alert(`Successfully exported ${allData.length} records!`);
             closeDialog();
         } catch (error) {
@@ -197,50 +203,6 @@ export function initExportData() {
             alert(`Failed to export data: ${error.message}`);
         } finally {
             hideLoading();
-        }
-    }
-
-    function convertToCSV(data) {
-        if (data.length === 0) return '';
-
-        // Get headers
-        const headers = Object.keys(data[0]);
-        
-        // Create CSV content
-        const csvRows = [];
-        
-        // Add header row
-        csvRows.push(headers.join(','));
-        
-        // Add data rows
-        for (const row of data) {
-            const values = headers.map(header => {
-                const value = row[header];
-                // Handle values that might contain commas
-                if (typeof value === 'string' && value.includes(',')) {
-                    return `"${value}"`;
-                }
-                return value;
-            });
-            csvRows.push(values.join(','));
-        }
-        
-        return csvRows.join('\n');
-    }
-
-    function downloadCSV(csv, filename) {
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        
-        if (link.download !== undefined) {
-            // Create a link to the file
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
     }
 

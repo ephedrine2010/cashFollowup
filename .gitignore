@@ -29,3 +29,6 @@ yarn-error.log*
 # Build outputs
 dist/
 build/
+
+# Claude Code
+CLAUDE.md
