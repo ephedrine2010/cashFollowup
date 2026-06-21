@@ -479,6 +479,43 @@ header h1 {
     background: #da190b;
 }
 
+/* View terminals button (table cell) */
+.view-terminals-btn {
+    padding: 6px 10px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: background 0.3s ease;
+}
+
+.view-terminals-btn:hover {
+    background: #449d48;
+}
+
+/* Terminals dialog */
+.terminals-dialog-content {
+    max-width: 360px;
+}
+
+.terminals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.terminal-link-btn {
+    width: 100%;
+}
+
+.terminals-empty {
+    text-align: center;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
 .empty-state {
     text-align: center;
     color: var(--text-secondary);
@@ -1190,6 +1227,77 @@ header h1 {
     grid-template-columns: repeat(3, 1fr);
     gap: 25px;
     margin-bottom: 0;
+}
+
+/* Geidea scanned-link parser */
+.geidea-link-section {
+    margin-bottom: 15px;
+    padding: 8px 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+.geidea-link-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #667eea;
+}
+
+.geidea-link-bar {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.geidea-links-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.geidea-link-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.geidea-btn {
+    width: auto;
+    margin: 0;
+    white-space: nowrap;
+    padding: 8px 14px;
+    font-size: 14px;
+}
+
+.geidea-link-input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.geidea-link-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.geidea-link-status {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    min-height: 1.1em;
+}
+
+.geidea-link-status.success {
+    color: #2e7d32;
+}
+
+.geidea-link-status.error {
+    color: #c62828;
 }
 
 /* Individual card group (Mada, Visa, Master) */

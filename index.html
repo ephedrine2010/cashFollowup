@@ -183,18 +183,19 @@
                                     <th>Amanco</th>
                                     <th>Actions</th>
                                     <th>Note</th>
+                                    <th>Terminals</th>
                                 </tr>
                             </thead>
                             <tbody id="sales-table-body">
                                 <tr class="empty-row">
-                                    <td colspan="18" class="empty-state">No sales records yet. Add your first record above!</td>
+                                    <td colspan="19" class="empty-state">No sales records yet. Add your first record above!</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr class="summary-row">
                                     <td colspan="14" class="summary-label">Total Cash (Unchecked Amanco):</td>
                                     <td id="total-cash-summary" class="summary-value total-cash-column">0.00</td>
-                                    <td colspan="3"></td>
+                                    <td colspan="4"></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -217,6 +218,19 @@
                 <button class="dialog-close" onclick="closeValuesDialog()">&times;</button>
             </div>
             <div class="dialog-body">
+                <!-- Geidea scanned links -->
+                <div class="geidea-link-section">
+                    <label class="geidea-link-label">Scan / paste Geidea Qrcode(s)</label>
+                    <div class="geidea-link-bar">
+                        <div id="geidea-links-container" class="geidea-links-container">
+                            <!-- Link rows generated dynamically -->
+                        </div>
+                        <button type="button" class="btn-add-more geidea-btn" onclick="addGeideaLinkRow()">+ Add</button>
+                        <button type="button" class="btn-primary geidea-btn" onclick="parseGeideaLinks()">Parse</button>
+                    </div>
+                    <div id="geidea-link-status" class="geidea-link-status"></div>
+                </div>
+
                 <div class="card-groups-container">
                     <!-- Mada Group -->
                     <div class="card-value-group">
@@ -258,6 +272,21 @@
             <div class="dialog-footer">
                 <button type="button" class="btn-secondary" onclick="closeValuesDialog()">Cancel</button>
                 <button type="button" class="btn-primary" onclick="saveMultipleValues()">Save All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminals Dialog -->
+    <div id="terminals-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content terminals-dialog-content">
+            <div class="dialog-header">
+                <h3>Terminals</h3>
+                <button class="dialog-close" onclick="closeTerminalsDialog()">&times;</button>
+            </div>
+            <div class="dialog-body">
+                <div id="terminals-list" class="terminals-list">
+                    <!-- Terminal link buttons generated dynamically -->
+                </div>
             </div>
         </div>
     </div>

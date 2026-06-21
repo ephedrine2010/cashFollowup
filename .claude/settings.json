@@ -2,7 +2,27 @@
   "permissions": {
     "allow": [
       "Bash(mkdir -p js/lib)",
-      "Bash(curl -fsSL -o js/lib/xlsx.mjs \"https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs\")"
+      "Bash(curl -fsSL -o js/lib/xlsx.mjs \"https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs\")",
+      "Bash(python -c ' *)",
+      "Bash(rm -f d:/cashFollowup/geidea_decoded.json && echo removed)",
+      "Bash(curl -sL -o js/lib/pako.esm.mjs https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.esm.mjs)",
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(node --check js/sales.js)",
+      "Bash(cp js/sales.js /tmp/sales-check.mjs)",
+      "Bash(node --check /tmp/sales-check.mjs)",
+      "Bash(rm -f /tmp/sales-check.mjs)",
+      "Bash(curl -sS -L -m 30 -i \"https://sa-api.nearpay.io/ui/reconciliation_receipt/19187fbb-47e2-4d78-8574-6964a78028f1\")",
+      "Bash(curl -sS -L -m 30 \"https://sa-api.nearpay.io/ui/reconciliation_receipt/19187fbb-47e2-4d78-8574-6964a78028f1\" -o /tmp/nearpay.html)",
+      "Read(//tmp/**)",
+      "Bash(node -e ' *)",
+      "Bash(cp /tmp/nearpay.html ./nearpay_tmp.html)",
+      "Bash(curl -sS -m 20 \"https://sa-api.nearpay.io/reconciliation_receipt/19187fbb-47e2-4d78-8574-6964a78028f1\" -o nearpay.json)",
+      "Bash(cp js/sales.js ./_chk.mjs)",
+      "Bash(node --check ./_chk.mjs)",
+      "Bash(rm -f ./_chk.mjs)"
+    ],
+    "additionalDirectories": [
+      "d:\\cashFollowup"
     ]
   }
 }
