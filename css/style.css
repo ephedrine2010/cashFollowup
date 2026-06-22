@@ -1252,17 +1252,35 @@ header h1 {
     align-items: flex-start;
 }
 
-.geidea-links-container {
-    flex: 1;
+.geidea-scanned-list {
+    margin-top: 8px;
+}
+
+.geidea-scanned-list:empty {
+    margin-top: 0;
+}
+
+.scanned-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2e7d32;
+    margin-bottom: 5px;
+}
+
+.scanned-chips {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 6px;
 }
 
-.geidea-link-row {
-    display: flex;
-    gap: 6px;
-    align-items: center;
+.scanned-chip {
+    padding: 3px 10px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
 .geidea-btn {

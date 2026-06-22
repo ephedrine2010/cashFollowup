@@ -222,12 +222,11 @@
                 <div class="geidea-link-section">
                     <label class="geidea-link-label">Scan / paste Geidea Qrcode(s)</label>
                     <div class="geidea-link-bar">
-                        <div id="geidea-links-container" class="geidea-links-container">
-                            <!-- Link rows generated dynamically -->
-                        </div>
-                        <button type="button" class="btn-add-more geidea-btn" onclick="addGeideaLinkRow()">+ Add</button>
-                        <button type="button" class="btn-primary geidea-btn" onclick="parseGeideaLinks()">Parse</button>
+                        <input type="text" id="geidea-link-input" class="geidea-link-input"
+                            placeholder="Paste a Geidea QR or NearPay receipt link…">
+                        <button type="button" class="btn-primary geidea-btn" onclick="parseGeideaLink()">Scan</button>
                     </div>
+                    <div id="geidea-scanned-list" class="geidea-scanned-list"></div>
                     <div id="geidea-link-status" class="geidea-link-status"></div>
                 </div>
 

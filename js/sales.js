@@ -499,10 +499,10 @@ function openValuesDialog() {
         }
     });
     
-    // Reset the Geidea link list and its status message
-    resetGeideaLinks();
-    // Start this dialog session from the already-committed links
+    // Start this dialog session from the already-committed links, then
+    // reset the input and render the scanned list from them
     pendingGeideaLinks = [...geideaLinks];
+    resetGeideaLinks();
 
     // Show dialog
     dialog.classList.remove('hidden');
@@ -727,72 +727,66 @@ async function getLinkTotals(raw) {
     return parseGeideaTotals(decodeGeideaLink(raw));
 }
 
-// Create one Geidea link input row (text field + remove button).
-function createGeideaLinkRow(value = '') {
-    const container = document.getElementById('geidea-links-container');
-    const row = document.createElement('div');
-    row.className = 'geidea-link-row';
+// Render the running list of links scanned this session, so the user can
+// confirm every one of them will be saved with the record on "Save All".
+function renderScannedLinks() {
+    const list = document.getElementById('geidea-scanned-list');
+    if (!list) return;
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'geidea-link-input';
-    input.placeholder = 'Paste a Geidea QR or NearPay receipt link…';
-    input.value = value;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'remove-value-btn';
-    removeBtn.textContent = '×';
-    removeBtn.onclick = () => removeGeideaLinkRow(row);
-
-    row.appendChild(input);
-    row.appendChild(removeBtn);
-    container.appendChild(row);
-}
-
-// Add another empty link row.
-function addGeideaLinkRow() {
-    createGeideaLinkRow();
-}
-
-// Remove a link row, always keeping at least one.
-function removeGeideaLinkRow(row) {
-    row.remove();
-    const container = document.getElementById('geidea-links-container');
-    if (container.querySelectorAll('.geidea-link-row').length === 0) {
-        createGeideaLinkRow();
+    if (pendingGeideaLinks.length === 0) {
+        list.innerHTML = '';
+        return;
     }
+
+    const chips = pendingGeideaLinks
+        .map((_, i) => `<span class="scanned-chip">Terminal ${i + 1}</span>`)
+        .join('');
+    list.innerHTML =
+        `<div class="scanned-title">Scanned terminals (${pendingGeideaLinks.length}) — all will be saved:</div>` +
+        `<div class="scanned-chips">${chips}</div>`;
 }
 
-// Reset the link list back to a single empty row and clear the status.
+// Reset the single link input, the scanned list, and the status message.
 function resetGeideaLinks() {
-    const container = document.getElementById('geidea-links-container');
+    const input = document.getElementById('geidea-link-input');
     const status = document.getElementById('geidea-link-status');
-    if (container) {
-        container.innerHTML = '';
-        createGeideaLinkRow();
-    }
+    if (input) input.value = '';
     if (status) {
         status.className = 'geidea-link-status';
         status.textContent = '';
     }
+    renderScannedLinks();
 }
 
-// Parse every non-empty link row and append each card total to its column.
-// Each link contributes its own value per column, so scanning several
-// settlements adds several entries.
-async function parseGeideaLinks() {
-    const container = document.getElementById('geidea-links-container');
+// Scan ONE link at a time: parse it, append each card total to its column,
+// remember the link, then clear the box ready for the next scan. All scanned
+// links accumulate in `pendingGeideaLinks` and are committed on "Save All".
+async function parseGeideaLink() {
+    const input = document.getElementById('geidea-link-input');
     const status = document.getElementById('geidea-link-status');
     status.className = 'geidea-link-status';
+
+    const raw = (input.value || '').trim();
+    if (!raw) {
+        status.classList.add('error');
+        status.textContent = 'Enter a link to scan.';
+        return;
+    }
+
     status.textContent = 'Parsing…';
 
-    const rows = Array.from(container.querySelectorAll('.geidea-link-row'));
+    let totals;
+    try {
+        totals = await getLinkTotals(raw);
+    } catch (e) {
+        status.classList.add('error');
+        status.textContent = `Could not read link: ${e.message}`;
+        return;
+    }
+
     const mappedCodes = Object.values(GEIDEA_SCHEME_MAP);
     const addedCount = { mada: 0, visa: 0, master: 0 };
     const unmappedNotes = [];
-    const errors = [];
-    const parsedRows = [];
 
     // Append one value to a card column (newest on top) and tally it
     const addValue = (field, amount) => {
@@ -802,76 +796,46 @@ async function parseGeideaLinks() {
         addedCount[field]++;
     };
 
-    // for...of so NearPay links (which need a network fetch) are awaited
-    let idx = 0;
-    for (const row of rows) {
-        const i = idx++;
-        const input = row.querySelector('.geidea-link-input');
-        const raw = (input.value || '').trim();
-        if (!raw) continue; // silently skip empty rows
+    let anyAmount = false;
 
-        let totals;
-        try {
-            totals = await getLinkTotals(raw);
-        } catch (e) {
-            errors.push(`Link ${i + 1}: ${e.message}`);
-            continue;
+    // Mapped schemes go to their own columns
+    Object.entries(GEIDEA_SCHEME_MAP).forEach(([field, code]) => {
+        const amount = totals[code] || 0;
+        if (amount > 0) {
+            addValue(field, amount);
+            anyAmount = true;
         }
+    });
 
-        let anyAmount = false;
-
-        // Mapped schemes go to their own columns
-        Object.entries(GEIDEA_SCHEME_MAP).forEach(([field, code]) => {
-            const amount = totals[code] || 0;
-            if (amount > 0) {
-                addValue(field, amount);
-                anyAmount = true;
-            }
-        });
-
-        // Any other scheme with a value is folded into Master, and noted
-        Object.entries(totals).forEach(([code, amount]) => {
-            if (amount > 0 && !mappedCodes.includes(code)) {
-                addValue('master', amount);
-                unmappedNotes.push(`${code} ${amount.toFixed(2)}`);
-                anyAmount = true;
-            }
-        });
-
-        if (anyAmount) {
-            parsedRows.push(row);
-            pendingGeideaLinks.push(raw); // remember the link for this record
-        } else {
-            errors.push(`Link ${i + 1}: no card amounts found`);
+    // Any other scheme with a value is folded into Master, and noted
+    Object.entries(totals).forEach(([code, amount]) => {
+        if (amount > 0 && !mappedCodes.includes(code)) {
+            addValue('master', amount);
+            unmappedNotes.push(`${code} ${amount.toFixed(2)}`);
+            anyAmount = true;
         }
-    }
+    });
 
-    // Remove successfully parsed rows; keep failed ones so they can be fixed
-    parsedRows.forEach(r => r.remove());
-    if (container.querySelectorAll('.geidea-link-row').length === 0) {
-        createGeideaLinkRow();
-    }
-
-    const messages = [];
-    if (parsedRows.length > 0) {
-        const summary = Object.entries(addedCount)
-            .filter(([, n]) => n > 0)
-            .map(([field, n]) => `${field.charAt(0).toUpperCase() + field.slice(1)} +${n}`)
-            .join(', ');
-        messages.push(`Parsed ${parsedRows.length} link(s): ${summary}`);
-    }
-    if (unmappedNotes.length) {
-        messages.push(`Unknown scheme(s) added to Master: ${unmappedNotes.join(', ')}`);
-    }
-    if (errors.length) messages.push(errors.join('; '));
-
-    if (parsedRows.length === 0 && errors.length === 0) {
+    if (!anyAmount) {
         status.classList.add('error');
-        status.textContent = 'Enter at least one link.';
+        status.textContent = 'Link parsed, but no card amounts found.';
         return;
     }
 
-    status.classList.add(errors.length ? 'error' : 'success');
+    // Remember this link, clear the box for the next scan, refresh the list
+    pendingGeideaLinks.push(raw);
+    input.value = '';
+    renderScannedLinks();
+
+    const summary = Object.entries(addedCount)
+        .filter(([, n]) => n > 0)
+        .map(([field, n]) => `${field.charAt(0).toUpperCase() + field.slice(1)} +${n}`)
+        .join(', ');
+    const messages = [`Scanned link ${pendingGeideaLinks.length}: ${summary}`];
+    if (unmappedNotes.length) {
+        messages.push(`Unknown scheme(s) added to Master: ${unmappedNotes.join(', ')}`);
+    }
+    status.classList.add('success');
     status.textContent = messages.join(' — ');
 }
 
@@ -893,8 +857,7 @@ window.closeValuesDialog = closeValuesDialog;
 window.addMoreValueInput = addMoreValueInput;
 window.saveMultipleValues = saveMultipleValues;
 window.removeValueInput = removeValueInput;
-window.parseGeideaLinks = parseGeideaLinks;
-window.addGeideaLinkRow = addGeideaLinkRow;
+window.parseGeideaLink = parseGeideaLink;
 window.openTerminalsDialog = openTerminalsDialog;
 window.closeTerminalsDialog = closeTerminalsDialog;
 
